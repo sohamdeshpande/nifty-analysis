@@ -143,6 +143,23 @@ def get_existing_csv(stock_name):
         print(f"Error reading CSV file: {e}")
         return None, None
     
+def update_csv_on_github(df, stock_name):
+    """
+    Updates the CSV file on GitHub.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to save to CSV.
+        stock_name (str): The name of the stock.
+    """
+    csv_file_path = os.path.join(DATA_DIR, f"{stock_name}.csv")
+    try:
+        # Save the dataframe locally.
+        df.to_csv(csv_file_path)
+        print(f"✅ CSV updated successfully locally at {csv_file_path}!")
+
+    except Exception as e:
+        print(f"❌ Error updating CSV: {e}")
+        
 # def update_csv_on_github(df, sha, STOCK_NAME):
 #     # Convert DataFrame to CSV string
 #     csv_content = df.to_csv()
