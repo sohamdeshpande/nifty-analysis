@@ -10,7 +10,7 @@ import os
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = "sohamdeshpande"
-REPO_NAME = "dashboard"
+REPO_NAME = "nifty-analysis"
 CSV_FILE_PATH = "data/ADANIENT.NS.csv"
 STOCK_NAME = ['ADANIENT.NS',
  'ADANIPORTS.NS',
@@ -95,7 +95,7 @@ def update_indicators(df, STOCK_NAME):
     df['SMA_200'] = df['Close'].rolling(window=200, min_periods=1).mean()
     df['Golden Cross'] = (df['SMA_20'].shift(1) < df['SMA_200'].shift(1)) & (df['SMA_20'] >= df['SMA_200'])
     df['Trend'] = (df['SMA_20'] > df['SMA_200'])  
-    df['Trend']=df['Trend'].map({True:'POSTIVE', False:'NEGATIVE'})
+    df['Trend']=df['Trend'].map({True:'POSITIVE', False:'NEGATIVE'})
     df['stock'] = STOCK_NAME
     return df
 

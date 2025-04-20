@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stock Trend Table</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 30px 0;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    .green { color: green; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Stock Analysis – Last 5 Days</h2>
+  <div id="tableContainer"></div>
+
+  <script>
+    // List all stock symbols without .csv extension
+    const stockFiles = [
+      'ADANIENT.NS',
+      'ADANIPORTS.NS',
+      'APOLLOHOSP.NS',
+      'ASIANPAINT.NS',
+      'AXISBANK.NS',
+      'BAJAJ-AUTO.NS',
+      'BAJFINANCE.NS',
+      'BAJAJFINSV.NS',
+      'BEL.NS',
+      'BPCL.NS',
+      'BHARTIARTL.NS',
+      'BRITANNIA.NS',
+      'CIPLA.NS',
+      'COALINDIA.NS',
+      'DRREDDY.NS',
+      'EICHERMOT.NS',
+      'GRASIM.NS',
+      'HCLTECH.NS',
+      'HDFCBANK.NS',
+      'HDFCLIFE.NS',
+      'HEROMOTOCO.NS',
+      'HINDALCO.NS',
+      'HINDUNILVR.NS',
+      'ICICIBANK.NS',
+      'ITC.NS',
+      'INDUSINDBK.NS',
+      'INFY.NS',
+      'JSWSTEEL.NS',
+      'KOTAKBANK.NS',
+      'LT.NS',
+      'M&M.NS',
+      'MARUTI.NS',
+      'NTPC.NS',
+      'NESTLEIND.NS',
+      'ONGC.NS',
+      'POWERGRID.NS',
+      'RELIANCE.NS',
+      'SBILIFE.NS',
+      'SHRIRAMFIN.NS',
+      'SBIN.NS',
+      'SUNPHARMA.NS',
+      'TCS.NS',
+      'TATACONSUM.NS',
+      'TATAMOTORS.NS',
+      'TATASTEEL.NS',
+      'TECHM.NS',
+      'TITAN.NS',
+      'TRENT.NS',
+      'ULTRACEMCO.NS',
+      'WIPRO.NS'
+    ];
+
+    const container = document.getElementById("tableContainer");
+
+    stockFiles.forEach(file => {
+      fetch(`data/${file}.csv`)
+        .then(res => res.text())
+        .then(data => {
+          const rows = data.trim().split("\n");
+          const headers = rows[0].split(",");
+          const stockName = file;
+          const last5 = rows.slice(-5); // last 5 days
+
+          // Build table
+          const table = document.createElement("table");
+          const thead = document.createElement("thead");
+          const headerRow = document.createElement("tr");
+          ["Stock", "Date", "Open", "Close", "Golden Cross", "Trend"].forEach(h => {
+            const th = document.createElement("th");
+            th.textContent = h;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+
+          const tbody = document.createElement("tbody");
+          last5.forEach(row => {
+            const cols = row.split(",");
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+              <td>${stockName}</td>
+              <td>${cols[0]}</td>
+              <td>${cols[4]}</td>
+              <td>${cols[2]}</td>
+              <td>${cols[8]}</td>
+              <td class="${cols[9].toUpperCase() === 'NEGATIVE' ? 'red' : 'green'}">${cols[9]}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          table.appendChild(tbody);
+          container.appendChild(table);
+        })
+        .catch(err => {
+          console.error(`Failed to load ${file}.csv:`, err);
+        });
+    });
+  </script>
+</body>
+</html>
