@@ -22,14 +22,7 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run analysis script
-        run: |
-          python analysis.py
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          git commit -m "Auto-update data folder from GitHub Actions" || echo "No changes to commit"
-          git push
+      - name: Run update script
+        run: python scripts/update_csv.py  # Updated path to the script
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
