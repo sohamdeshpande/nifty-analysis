@@ -63,22 +63,45 @@ STOCK_NAME = ['ADANIENT.NS',
  'ULTRACEMCO.NS',
  'WIPRO.NS']
 
-def get_existing_csv(STOCK_NAME):
-    # Get the existing CSV from GitHub
-    CSV_FILE_PATH = f'''data/{STOCK_NAME}.csv'''
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{CSV_FILE_PATH}"
-    print(f'''this is url {url}''')
-    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        content = response.json()["content"]
-        decoded_content = base64.b64decode(content).decode('utf-8')
-        df = pd.read_csv(io.StringIO(decoded_content), index_col=0, parse_dates=True)
-        sha = response.json()["sha"]  # Required for updating the file
-        return df, sha
-    else:
-        print("Error fetching CSV:", response.status_code)
+DATA_DIR = "data"  # Consistent definition of the data directory
+
+def get_existing_csv(stock_name):
+    """
+    Gets the existing CSV data from the local file system.
+
+    Args:
+        stock_name (str): The name of the stock (e.g., 'ADANIENT.NS').
+
+    Returns:
+        pandas.DataFrame: The existing CSV data, or None on error.
+    """
+    csv_file_path = os.path.join(DATA_DIR, f"{stock_name}.csv")
+    try:
+        df = pd.read_csv(csv_file_path, index_col=0, parse_dates=True)
+        return df, None  # Return None for SHA as we're reading locally
+    except FileNotFoundError:
+        print(f"Error: File not found at {csv_file_path}")
         return None, None
+    except Exception as e:
+        print(f"Error reading CSV file: {e}")
+        return None, None
+
+# def get_existing_csv(STOCK_NAME):
+#     # Get the existing CSV from GitHub
+#     CSV_FILE_PATH = f'''data/{STOCK_NAME}.csv'''
+#     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{CSV_FILE_PATH}"
+#     print(f'''this is url {url}''')
+#     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+#     response = requests.get(url, headers=headers)
+#     if response.status_code == 200:
+#         content = response.json()["content"]
+#         decoded_content = base64.b64decode(content).decode('utf-8')
+#         df = pd.read_csv(io.StringIO(decoded_content), index_col=0, parse_dates=True)
+#         sha = response.json()["sha"]  # Required for updating the file
+#         return df, sha
+#     else:
+#         print("Error fetching CSV:", response.status_code)
+#         return None, None
     
 def get_last_day_data(STOCK_NAME):
     # Fetch latest data for the last day
