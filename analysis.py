@@ -122,29 +122,50 @@ def update_indicators(df, STOCK_NAME):
     df['stock'] = STOCK_NAME
     return df
 
-def update_csv_on_github(df, sha, STOCK_NAME):
-    # Convert DataFrame to CSV string
-    csv_content = df.to_csv()
-    encoded_content = base64.b64encode(csv_content.encode()).decode()
+def get_existing_csv(stock_name):
+    """
+    Gets the existing CSV data from the local file system.
 
-    # Create commit data
-    commit_data = {
-        "message": f"Updated CSV with latest data on {datetime.today().strftime('%Y-%m-%d')}",
-        "content": encoded_content,
-        "sha": sha,
-        "branch": "main"
-    }
+    Args:
+        stock_name (str): The name of the stock (e.g., 'ADANIENT.NS').
 
-    # Upload updated CSV to GitHub
-    CSV_FILE_PATH = f'''data/{STOCK_NAME}.csv'''
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{CSV_FILE_PATH}"
-    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
-    response = requests.put(url, headers=headers, data=json.dumps(commit_data))
+    Returns:
+        pandas.DataFrame: The existing CSV data, or None on error.
+    """
+    csv_file_path = os.path.join(DATA_DIR, f"{stock_name}.csv")
+    try:
+        df = pd.read_csv(csv_file_path, index_col=0, parse_dates=True)
+        return df, None  # Return None for SHA as we're reading locally
+    except FileNotFoundError:
+        print(f"Error: File not found at {csv_file_path}")
+        return None, None
+    except Exception as e:
+        print(f"Error reading CSV file: {e}")
+        return None, None
+    
+# def update_csv_on_github(df, sha, STOCK_NAME):
+#     # Convert DataFrame to CSV string
+#     csv_content = df.to_csv()
+#     encoded_content = base64.b64encode(csv_content.encode()).decode()
 
-    if response.status_code == 200:
-        print("✅ CSV updated successfully on GitHub!")
-    else:
-        print("❌ Error updating CSV:", response.status_code, response.json())
+#     # Create commit data
+#     commit_data = {
+#         "message": f"Updated CSV with latest data on {datetime.today().strftime('%Y-%m-%d')}",
+#         "content": encoded_content,
+#         "sha": sha,
+#         "branch": "main"
+#     }
+
+#     # Upload updated CSV to GitHub
+#     CSV_FILE_PATH = f'''data/{STOCK_NAME}.csv'''
+#     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{CSV_FILE_PATH}"
+#     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+#     response = requests.put(url, headers=headers, data=json.dumps(commit_data))
+
+#     if response.status_code == 200:
+#         print("✅ CSV updated successfully on GitHub!")
+#     else:
+#         print("❌ Error updating CSV:", response.status_code, response.json())
 
 def main():
     for STOCK in STOCK_NAME:
