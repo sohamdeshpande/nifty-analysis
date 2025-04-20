@@ -1,139 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Stock Trend Table</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 30px 0;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #f4f4f4;
-    }
-
-    .green { color: green; font-weight: bold; }
-    .red { color: red; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #stockTable {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        #stockTable th, #stockTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        #stockTable th {
+            background-color: #f0f0f0;
+        }
+        #stockTable tbody tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        #chartContainer {
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center; /* Center the canvas within the container */
+        }
+        #myChart {
+            display: inline-block; /* Make the canvas an inline block element */
+            max-width: 100%;  /* Ensure chart does not exceed the container width. */
+            height: auto;      /* Maintain aspect ratio. */
+        }
+        .green {
+            color: green;
+        }
+        .red {
+            color: red;
+        }
+    </style>
 </head>
 <body>
-  <h2>Stock Analysis – Last 5 Days</h2>
-  <div id="tableContainer"></div>
-
-  <script>
-    // List all stock symbols without .csv extension
-    const stockFiles = [
-      'ADANIENT.NS',
-      'ADANIPORTS.NS',
-      'APOLLOHOSP.NS',
-      'ASIANPAINT.NS',
-      'AXISBANK.NS',
-      'BAJAJ-AUTO.NS',
-      'BAJFINANCE.NS',
-      'BAJAJFINSV.NS',
-      'BEL.NS',
-      'BPCL.NS',
-      'BHARTIARTL.NS',
-      'BRITANNIA.NS',
-      'CIPLA.NS',
-      'COALINDIA.NS',
-      'DRREDDY.NS',
-      'EICHERMOT.NS',
-      'GRASIM.NS',
-      'HCLTECH.NS',
-      'HDFCBANK.NS',
-      'HDFCLIFE.NS',
-      'HEROMOTOCO.NS',
-      'HINDALCO.NS',
-      'HINDUNILVR.NS',
-      'ICICIBANK.NS',
-      'ITC.NS',
-      'INDUSINDBK.NS',
-      'INFY.NS',
-      'JSWSTEEL.NS',
-      'KOTAKBANK.NS',
-      'LT.NS',
-      'M&M.NS',
-      'MARUTI.NS',
-      'NTPC.NS',
-      'NESTLEIND.NS',
-      'ONGC.NS',
-      'POWERGRID.NS',
-      'RELIANCE.NS',
-      'SBILIFE.NS',
-      'SHRIRAMFIN.NS',
-      'SBIN.NS',
-      'SUNPHARMA.NS',
-      'TCS.NS',
-      'TATACONSUM.NS',
-      'TATAMOTORS.NS',
-      'TATASTEEL.NS',
-      'TECHM.NS',
-      'TITAN.NS',
-      'TRENT.NS',
-      'ULTRACEMCO.NS',
-      'WIPRO.NS'
-    ];
-
-    const container = document.getElementById("tableContainer");
-
-    stockFiles.forEach(file => {
-      fetch(`data/${file}.csv`)
-        .then(res => res.text())
-        .then(data => {
-          const rows = data.trim().split("\n");
-          const headers = rows[0].split(",");
-          const stockName = file;
-          const last5 = rows.slice(-5); // last 5 days
-
-          // Build table
-          const table = document.createElement("table");
-          const thead = document.createElement("thead");
-          const headerRow = document.createElement("tr");
-          ["Stock", "Date", "Open", "Close", "Golden Cross", "Trend"].forEach(h => {
-            const th = document.createElement("th");
-            th.textContent = h;
-            headerRow.appendChild(th);
-          });
-          thead.appendChild(headerRow);
-          table.appendChild(thead);
-
-          const tbody = document.createElement("tbody");
-          last5.forEach(row => {
-            const cols = row.split(",");
-            const tr = document.createElement("tr");
-
-            tr.innerHTML = `
-              <td>${stockName}</td>
-              <td>${cols[0]}</td>
-              <td>${cols[4]}</td>
-              <td>${cols[2]}</td>
-              <td>${cols[8]}</td>
-              <td class="${cols[9].toUpperCase() === 'NEGATIVE' ? 'red' : 'green'}">${cols[9]}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          table.appendChild(tbody);
-          container.appendChild(table);
-        })
-        .catch(err => {
-          console.error(`Failed to load ${file}.csv:`, err);
+    <h1>Stock Analysis Dashboard</h1>
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Date</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Golden Cross</th>
+                <th>Trend</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="chartContainer" style="display: none;">
+        <h2>Stock Chart</h2>
+        <canvas id="myChart"></canvas>
+    </div>
+    <script>
+        const stockFiles = [
+            'ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS',
+            'BAJAJ-AUTO.NS', 'BAJFINANCE.NS', 'BAJAJFINSV.NS', 'BEL.NS', 'BPCL.NS',
+            'BHARTIARTL.NS', 'BRITANNIA.NS', 'CIPLA.NS', 'COALINDIA.NS', 'DRREDDY.NS',
+            'EICHERMOT.NS', 'GRASIM.NS', 'HCLTECH.NS', 'HDFCBANK.NS', 'HDFCLIFE.NS',
+            'HEROMOTOCO.NS', 'HINDALCO.NS', 'HINDUNILVR.NS', 'ICICIBANK.NS', 'ITC.NS',
+            'INDUSINDBK.NS', 'INFY.NS', 'JSWSTEEL.NS', 'KOTAKBANK.NS', 'LT.NS',
+            'M&M.NS', 'MARUTI.NS', 'NTPC.NS', 'NESTLEIND.NS', 'ONGC.NS', 'POWERGRID.NS',
+            'RELIANCE.NS', 'SBILIFE.NS', 'SHRIRAMFIN.NS', 'SBIN.NS', 'SUNPHARMA.NS',
+            'TCS.NS', 'TATACONSUM.NS', 'TATAMOTORS.NS', 'TATASTEEL.NS', 'TECHM.NS',
+            'TITAN.NS', 'TRENT.NS', 'ULTRACEMCO.NS', 'WIPRO.NS'
+        ];
+        const tableBody = document.querySelector("#stockTable tbody");
+        const chartContainer = document.getElementById("chartContainer");
+        const chartCanvas = document.getElementById("myChart");
+        let stockChart; // Global chart instance
+        function createTableRows() {
+            stockFiles.forEach(file => {
+                fetch(`data/${file}.csv`)
+                    .then(response => response.text())
+                    .then(data => {
+                        const rows = data.trim().split("\n");
+                        const headers = rows[0].split(",");
+                        const last5 = rows.slice(-5);
+                        last5.forEach(row => {
+                            const cols = row.split(",");
+                            const tr = document.createElement("tr");
+                            tr.dataset.stock = file;
+                            tr.innerHTML = `
+                                <td>${file}</td>
+                                <td>${cols[0]}</td>
+                                <td>${cols[1]}</td>
+                                <td>${cols[2]}</td>
+                                <td>${cols[8]}</td>
+                                <td class="${cols[9].toLowerCase() === 'positive' ? 'green' : 'red'}">${cols[9]}</td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
+                    })
+                    .catch(error => console.error(`Error fetching ${file}.csv:`, error));
+            });
+        }
+        function createChart(stockName) {
+            fetch(`data/${stockName}.csv`)
+                .then(response => response.text())
+                .then(data => {
+                    const rows = data.trim().split("\n");
+                    const headers = rows[0].split(",");
+                    const dates = [];
+                    const openPrices = [];
+                    const closePrices = [];
+                    const sma20s = [];
+                    const sma200s = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const cols = rows[i].split(",");
+                        dates.push(cols[0]);
+                        openPrices.push(parseFloat(cols[1]));
+                        closePrices.push(parseFloat(cols[2]));
+                        sma20s.push(parseFloat(cols[7]));
+                        sma200s.push(parseFloat(cols[8]));
+                    }
+                    if (stockChart) {
+                        stockChart.destroy();
+                    }
+                    stockChart = new Chart(chartCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [
+                                {
+                                    label: 'Open Price',
+                                    data: openPrices,
+                                    borderColor: 'rgba(0, 123, 255, 1)',
+                                    fill: false,
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: 'Close Price',
+                                    data: closePrices,
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    fill: false,
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: '20-day SMA',
+                                    data: sma20s,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    fill: false,
+                                    pointRadius: 0
+                                },
+                                {
+                                    label: '200-day SMA',
+                                    data: sma200s,
+                                    borderColor: 'rgba(192, 75, 192, 1)',
+                                    fill: false,
+                                    pointRadius: 0
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `${stockName} - Price and Moving Averages`,
+                                    font: {
+                                        size: 16
+                                    }
+                                },
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Price'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    chartContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error(`Error fetching ${stockName}.csv for chart:`, error);
+                    chartContainer.style.display = 'none';
+                });
+        }
+        tableBody.addEventListener('click', (event) => {
+            const targetRow = event.target.closest('tr');
+            if (targetRow) {
+                const stockName = targetRow.dataset.stock;
+                createChart(stockName);
+            }
         });
-    });
-  </script>
+        createTableRows();
+    </script>
 </body>
 </html>
