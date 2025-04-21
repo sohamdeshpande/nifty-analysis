@@ -191,7 +191,7 @@ def main():
             new_data = get_last_day_data(STOCK)
             df = pd.concat([df, new_data]).drop_duplicates()
             df = update_indicators(df,STOCK)
-            update_csv_on_github(df, sha, STOCK)
+            update_csv_on_github(df, STOCK)
 
 if __name__ == "__main__":
     main()
