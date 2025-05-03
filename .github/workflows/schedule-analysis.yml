@@ -2,7 +2,7 @@ name: Run Analysis Script Daily
 
 on:
   schedule:
-    - cron: '30 0 * * 1-5'  # Runs at 6:00 AM IST (which is 0:30 AM UTC) Monday to Friday
+    - cron: '30 0 * * *'  # Runs at 6:00 AM IST (which is 0:30 AM UTC) Monday to Friday
   workflow_dispatch: # Allow manual trigger
 
 permissions:
