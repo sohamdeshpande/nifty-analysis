@@ -187,7 +187,7 @@ def update_csv_on_github(df, stock_name):
 #         print("❌ Error updating CSV:", response.status_code, response.json())
 
 def main():
-    for STOCK in STOCK_NAME:
+    for STOCK in ["BEL.NS"]:
         df, sha = get_existing_csv(STOCK)
         if df is not None:
             time.sleep(1)
