@@ -106,7 +106,7 @@ def get_existing_csv(stock_name):
     
 def get_last_day_data(STOCK_NAME):
     # Fetch latest data for the last day
-    time.sleep(5)
+    time.sleep(15)
     stock_data = yf.download(STOCK_NAME, period="2d", interval="1d")
     if isinstance(stock_data.columns, pd.MultiIndex):
         stock_data.columns = stock_data.columns.droplevel(1)
