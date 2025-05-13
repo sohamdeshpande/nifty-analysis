@@ -190,6 +190,7 @@ def main():
     for STOCK in STOCK_NAME:
         df, sha = get_existing_csv(STOCK)
         if df is not None:
+            time.sleep(1)
             new_data = get_last_day_data(STOCK)
             df = pd.concat([df, new_data]).drop_duplicates()
             df = update_indicators(df,STOCK)
