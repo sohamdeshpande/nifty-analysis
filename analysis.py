@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 import io
 import os
+import time
 
 GITHUB_TOKEN = os.getenv("TOKEN_GITHUB")
 REPO_OWNER = "sohamdeshpande"
@@ -105,6 +106,7 @@ def get_existing_csv(stock_name):
     
 def get_last_day_data(STOCK_NAME):
     # Fetch latest data for the last day
+    time.sleep(1)
     stock_data = yf.download(STOCK_NAME, period="2d", interval="1d")
     if isinstance(stock_data.columns, pd.MultiIndex):
         stock_data.columns = stock_data.columns.droplevel(1)
